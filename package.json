@@ -1,0 +1,61 @@
+{
+  "name": "dsh-think-dock",
+  "version": "0.1.0",
+  "description": "A right-sidebar dock for the model's thinking in DeepSeek Harness: read the reasoning stream per turn and step, with optional translation, without expanding it inline.",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "reasoning",
+    "thinking",
+    "chain-of-thought",
+    "sidebar",
+    "translation"
+  ],
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "icon": "./icon.svg",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-sidebar-right"
+      ],
+      "platform": "web"
+    },
+    "manifestVersion": 1
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YOUR_GITHUB_NAME/dsh-think-dock.git"
+  },
+  "homepage": "https://github.com/YOUR_GITHUB_NAME/dsh-think-dock#readme",
+  "bugs": {
+    "url": "https://github.com/YOUR_GITHUB_NAME/dsh-think-dock/issues"
+  },
+  "author": "YOUR NAME",
+  "license": "MIT"
+}

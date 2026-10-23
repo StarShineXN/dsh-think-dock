@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>思考面板 · v7 · 纸白/夜墨 · 两项颜色可调 · 独立历史</title>
+<style>
+  /* ============================================================
+     主题变量：所有颜色只在这里出现，换主题 = 换一组变量。
+     留了三个自定义接口：--p-bg-image（背景图）、--bubble-radius
+     （气泡圆角）、--bubble-tail（气泡尖角）。未来设置面板直接
+     改这三个变量即可，不动结构。
+     ============================================================ */
+  :root {
+    --font: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    --mono: "JetBrains Mono", "Cascadia Mono", ui-monospace, monospace;
+    --r: 12px;
+    --p-bg-image: none;
+    --bubble-radius: 15px;
+    --bubble-tail: 5px;
+    --density: 1;
+  }
+
+  /* 1 · 暖砂（默认，低饱和纸感） */
+    /* 1 · 暖砂 */
+    /* 1 · 暖砂 */
+  [data-theme="sand"] {
+    --page: #c7c2b8; --page-2: #b3aea4;
+    --panel: rgba(238, 234, 226, .66); --panel-line: rgba(255, 255, 255, .48);
+    --surface: #e6e1d6; --surface-2: #ddd7c9;
+    --ink-base: #34302a; --ink-strong: #17140f; --ink-2: #5b554a; --ink-3: #655e53;
+    --line: rgba(118, 108, 92, .2); --line-2: rgba(108, 98, 82, .3);
+    --accent: #8a9a7b; --accent-ink: #4f5c44; --accent-soft: rgba(138, 154, 123, .15);
+    --mine-base: #b7ab93; --mine-ink-base: #3a3329; --mine-line: rgba(96, 88, 74, .24);
+  }
+  /* 2 · 雾蓝 */
+  [data-theme="mist"] {
+    --page: #b8c0c7; --page-2: #a5aeb6;
+    --panel: rgba(228, 233, 237, .66); --panel-line: rgba(255, 255, 255, .48);
+    --surface: #d8dee3; --surface-2: #ced5db;
+    --ink-base: #2e363d; --ink-strong: #131920; --ink-2: #4e5963; --ink-3: #555f69;
+    --line: rgba(88, 102, 116, .2); --line-2: rgba(78, 92, 106, .3);
+    --accent: #8798aa; --accent-ink: #47535f; --accent-soft: rgba(135, 152, 170, .15);
+    --mine-base: #a9b3bb; --mine-ink-base: #26303a; --mine-line: rgba(66, 80, 94, .26);
+  }
+  /* 3 · 豆绿 */
+  [data-theme="sage"] {
+    --page: #b6bdb0; --page-2: #a3aa9d;
+    --panel: rgba(228, 232, 221, .66); --panel-line: rgba(255, 255, 255, .48);
+    --surface: #d8ddcd; --surface-2: #ced4c2;
+    --ink-base: #2f3629; --ink-strong: #131810; --ink-2: #4f5945; --ink-3: #56614c;
+    --line: rgba(92, 102, 78, .2); --line-2: rgba(82, 92, 68, .3);
+    --accent: #8fa27f; --accent-ink: #48543c; --accent-soft: rgba(143, 162, 127, .15);
+    --mine-base: #a8b09c; --mine-ink-base: #28301f; --mine-line: rgba(70, 80, 58, .26);
+  }
+  /* 4 · 灰粉 */
+  [data-theme="rose"] {
+    --page: #c2b9b7; --page-2: #afa6a4;
+    --panel: rgba(233, 226, 224, .66); --panel-line: rgba(255, 255, 255, .48);
+    --surface: #dbd1cf; --surface-2: #d3c7c5;
+    --ink-base: #332b29; --ink-strong: #160f0e; --ink-2: #574a47; --ink-3: #60524f;
+    --line: rgba(108, 88, 86, .2); --line-2: rgba(96, 78, 76, .3);
+    --accent: #b09a9a; --accent-ink: #5f4b47; --accent-soft: rgba(176, 154, 154, .15);
+    --mine-base: #b3a5a3; --mine-ink-base: #332a28; --mine-line: rgba(78, 62, 60, .26);
+  }
+  /* 5 · 夜墨 */
+  [data-theme="ink"] {
+    --page: #14171a; --page-2: #0d1012;
+    --panel: rgba(36, 40, 43, .62); --panel-line: rgba(255, 255, 255, .08);
+    --surface: #2b3034; --surface-2: #33393d;
+    --ink-base: #c3c9ca; --ink-strong: #f2f5f5; --ink-2: #9aa2a4; --ink-3: #98a0a3;
+    --line: rgba(160, 172, 176, .15); --line-2: rgba(160, 172, 176, .24);
+    --accent: #8fa6a3; --accent-ink: #b5c8c5; --accent-soft: rgba(143, 166, 163, .15);
+    --mine-base: #3b4247; --mine-ink-base: #cfd5d6; --mine-line: rgba(180, 192, 196, .18);
+  }
+  /* 6 · 纸白（简约：白底 + 淡蓝气泡） */
+  [data-theme="paper"] {
+    --page: #f3f5f7; --page-2: #e2e7ec;
+    --panel: rgba(255, 255, 255, .78); --panel-line: rgba(255, 255, 255, .95);
+    --surface: #e7f0fa; --surface-2: #dce9f7;
+    --ink-base: #26313a; --ink-strong: #0d141a; --ink-2: #55636e; --ink-3: #5f6c76;
+    --line: rgba(96, 116, 134, .18); --line-2: rgba(86, 106, 124, .28);
+    --accent: #7fa2c4; --accent-ink: #436179; --accent-soft: rgba(127, 162, 196, .16);
+    --mine-base: #a6c7e8; --mine-ink-base: #22303c; --mine-line: rgba(86, 118, 146, .22);
+  }
+
+  /* ---------- 可调项：气泡深浅 / 气泡文字亮度 / 文字对比 / 玻璃强度 ---------- */
+  :root {
+    --bubble-depth: 68;   /* 0 = 与底色同、100 = 原始气泡色 */
+    --bubble-lift: 0;     /* 0…100：气泡文字往白色提亮 */
+    --ink-strength: 100;  /* 0 = 柔和、100 = 原始字色 */
+    --glass-blur: 22;     /* px */
+  }
+  body {
+    --ink: color-mix(in srgb, var(--ink-base) calc(var(--ink-strength, 100) * 1%), var(--ink-strong));
+    --mine: color-mix(in srgb, var(--mine-base) calc(var(--bubble-depth, 68) * 1%), var(--surface));
+    --mine-ink: color-mix(in srgb, var(--mine-ink-base) calc(var(--bubble-lift, 0) * 1%), #ffffff);
+  }
+
+
+
+
+
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; font-family: var(--font); background: var(--page); color: var(--ink);
+    display: flex; align-items: center; justify-content: center; padding: 26px;
+    transition: background .25s, color .25s;
+  }
+
+  /* ---------- 主题切换器（演示用，不进插件） ---------- */
+  .switcher {
+    position: fixed; left: 14px; top: 50%; translate: 0 -50%; display: flex; flex-direction: column; gap: 2px; padding: 4px;
+    background: rgba(255, 255, 255, .35); border: 1px solid var(--line); border-radius: 999px;
+    backdrop-filter: blur(12px); font-size: 12px; color: var(--ink-2); z-index: 20;
+    box-shadow: 0 10px 30px -18px rgba(40, 40, 40, .5);
+  }
+  .switcher button {
+    font: inherit; color: inherit; border: 0; background: none; cursor: pointer;
+    padding: 5px 11px; border-radius: 999px; transition: .18s; white-space: nowrap;
+  }
+  [data-theme="ink"] .switcher { color: #a8adb0; background: rgba(25, 27, 30, .6); border-color: #3a3e42; }\n  .switcher button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+
+  /* ---------- 面板 ---------- */
+  .panel {
+    position: relative; width: min(580px, 100%); height: min(800px, calc(100vh - 52px));
+    background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+    overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 24px 60px -40px rgba(50, 45, 38, .55), 0 2px 6px rgba(50, 45, 38, .04);
+  }
+  body {
+    background:
+      radial-gradient(58% 46% at 18% 16%, color-mix(in srgb, var(--page-2) 72%, #fff 8%) 0%, transparent 62%),
+      radial-gradient(52% 44% at 84% 78%, var(--page-2) 0%, transparent 66%),
+      linear-gradient(160deg, var(--page) 0%, var(--page-2) 100%);
+    background-attachment: fixed;
+  }
+
+  /* ---------- 毛玻璃（强度可调：--glass-blur） ---------- */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    backdrop-filter: blur(var(--glass-blur, 22px)) saturate(118%);
+    -webkit-backdrop-filter: blur(var(--glass-blur, 22px)) saturate(118%);
+    box-shadow:
+      0 30px 64px -44px rgba(28, 24, 18, .7),
+      0 1px 0 rgba(255, 255, 255, .5) inset,
+      0 -1px 0 rgba(0, 0, 0, .04) inset;
+  }
+  [data-theme="ink"] .panel {
+    box-shadow:
+      0 30px 64px -44px rgba(0, 0, 0, .9),
+      0 1px 0 rgba(255, 255, 255, .06) inset;
+  }
+  [data-theme="paper"] .panel {
+    box-shadow:
+      0 30px 60px -46px rgba(32, 48, 64, .35),
+      0 1px 0 rgba(255, 255, 255, .9) inset;
+  }
+  .mine {
+    background: var(--mine); color: var(--mine-ink); border-color: var(--mine-line);
+    backdrop-filter: blur(calc(var(--glass-blur, 22px) * .38)); -webkit-backdrop-filter: blur(calc(var(--glass-blur, 22px) * .38));
+    box-shadow: 0 6px 18px -14px rgba(28, 24, 18, .55);
+  }
+  .step { background: color-mix(in srgb, var(--surface) 86%, transparent); }
+
+  /* 定位条箭头：小圆钮，常显，到边自动收起 */
+  .rail-nav {
+    top: 4px !important; bottom: auto !important; width: 22px !important; height: 22px !important;
+    border-radius: 999px; background: var(--surface) !important;
+    border: 1px solid var(--line-2) !important; color: var(--ink-2);
+    box-shadow: 0 2px 8px -4px rgba(30, 26, 20, .45);
+  }
+  .rail-nav[data-side="left"] { left: 2px !important; }
+  .rail-nav[data-side="right"] { right: 2px !important; }
+  .rail-nav[hidden] { display: none !important; }
+  .rail-nav:hover { color: var(--ink); background: var(--surface-2) !important; }
+
+  /* ---------- 外观面板里的滑杆读数 ---------- */
+  .popover label {
+    display: grid; grid-template-columns: 1fr auto; gap: 5px 8px; align-items: center;
+  }
+  .popover label > input[type="range"] { grid-column: 1 / -1; width: 100%; margin: 0; }
+  .popover label .val {
+    grid-row: 1; grid-column: 2; margin: 0; justify-self: end; font-variant-numeric: tabular-nums;
+    color: var(--ink-3); font-size: 10.5px;
+  }
+  .popover label:has(input[type="text"]) { display: block; }
+  .popover label:has(input[type="text"]) input { margin-top: 5px; }
+
+
+
+
+
+  .panel::before { /* 背景图接口：--p-bg-image 不是 none 时铺在内容下面 */
+    content: ""; position: absolute; inset: 0; background-image: var(--p-bg-image);
+    background-size: cover; background-position: center; opacity: .5; pointer-events: none;
+  }
+
+  /* ---------- 头部 ---------- */
+  .head { position: relative; z-index: 3; padding: 16px 16px 8px; display: flex; flex-direction: column; gap: 9px; }
+  .title-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+  .title { font-size: 15px; font-weight: 600; letter-spacing: .01em; }
+  .counts { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .tools { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .tool {
+    font: inherit; font-size: 11.5px; color: var(--ink-2); background: transparent;
+    border: 1px solid transparent; border-radius: 8px; padding: 5px 8px; cursor: pointer;
+    transition: .16s; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+  }
+  .tool:hover { background: var(--surface-2); color: var(--ink); }
+  .tool[aria-expanded="true"] { background: var(--surface); border-color: var(--line-2); color: var(--ink); }
+  .tool svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+  /* 快速定位：横向滚动条（不再换行、不再被裁掉） */
+  .rail-wrap { position: relative; }
+  .rail {
+    display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; padding: 1px 0 3px;
+    scroll-behavior: smooth; mask-image: linear-gradient(90deg, transparent 0, #000 10px, #000 calc(100% - 18px), transparent 100%);
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .chip {
+    flex: none; font: inherit; font-size: 11px; color: var(--ink-2); cursor: pointer;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 7px;
+    padding: 4px 8px; display: inline-flex; align-items: center; gap: 5px; max-width: 190px;
+    transition: .16s;
+  }
+  .chip b { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .chip:hover { border-color: var(--line-2); background: var(--surface-2); }
+  .chip[data-active="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+  .rail-nav {
+    position: absolute; top: 0; bottom: 3px; width: 22px; border: 0; padding: 0; cursor: pointer;
+    background: linear-gradient(90deg, rgba(0,0,0,0), var(--panel) 65%); color: var(--ink-3);
+    display: none; place-items: center; font-size: 13px;
+  }
+  .rail-wrap[data-overflow="true"] .rail-nav { display: grid; }
+  .rail-nav[data-side="left"] { left: 0; rotate: 180deg; }
+  .rail-nav[data-side="right"] { right: 0; }
+
+  /* ---------- 滚动区 ---------- */
+  .scroll { position: relative; z-index: 2; flex: 1; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+  .scroll::-webkit-scrollbar { width: 8px; }
+  .scroll::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 99px; border: 2px solid var(--panel); }
+  .body { padding: 6px 26px 40px 16px; display: flex; flex-direction: column; gap: 18px; }
+
+  /* 轮次 */
+  .turn { display: flex; flex-direction: column; gap: 8px; scroll-margin-top: 10px; }
+
+  /* 用户气泡：右侧，无头像 */
+  .mine-row { display: flex; justify-content: flex-end; }
+  .mine {
+    max-width: 80%; position: relative; background: var(--mine); border: 1px solid var(--mine-line);
+    color: var(--ink); padding: 9px 12px; font-size: 12.5px; line-height: 1.65;
+    border-radius: var(--bubble-radius) var(--bubble-radius) var(--bubble-tail) var(--bubble-radius);
+  }
+  .mine::after { /* 气泡尾巴，形状可调 */
+    content: ""; position: absolute; right: -1px; bottom: -1px; width: 9px; height: 9px;
+    background: var(--mine); border-right: 1px solid var(--mine-line); border-bottom: 1px solid var(--mine-line);
+    border-bottom-right-radius: var(--bubble-tail);
+  }
+  .turn-meta { font-size: 10.5px; color: var(--ink-3); text-align: right; padding-right: 2px; font-variant-numeric: tabular-nums; }
+
+  /* AI 思考：左侧，无头像，直接以卡片呈现 */
+  .ai { display: flex; flex-direction: column; gap: 6px; }
+  .steps { display: flex; flex-direction: column; gap: 5px; border-left: 1.5px solid var(--line); margin-left: 3px; padding-left: 11px; }
+  .step { border-radius: var(--r); transition: background .18s; }
+  .step:hover { background: var(--surface); }
+  .step[data-open="true"] { background: var(--surface); border: 1px solid var(--line); }
+  .step[data-open="true"]:hover { background: var(--surface); }
+  .step-head {
+    width: 100%; display: flex; align-items: baseline; gap: 8px; text-align: left;
+    font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 6px 8px;
+  }
+  .no { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); letter-spacing: .02em; }
+  .state { font-size: 10px; padding: 1.5px 6px; border-radius: 99px; color: var(--accent-ink); background: var(--accent-soft); }
+  .chars { margin-left: auto; font-size: 10.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .caret { width: 11px; height: 11px; stroke: var(--ink-3); fill: none; stroke-width: 1.7; transition: rotate .2s; }
+  .step[data-open="true"] .caret { rotate: 90deg; }
+  .step-body { display: none; padding: 0 9px 9px 9px; }
+  .step[data-open="true"] .step-body { display: block; }
+  .think { margin: 0; font-size: 13px; line-height: 1.78; color: var(--ink-2); white-space: pre-wrap; }
+  .tr { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line-2); color: var(--accent-ink); font-size: 12.5px; line-height: 1.7; }
+  .step-actions { display: flex; gap: 4px; margin-top: 8px; opacity: 0; transition: .18s; }
+  .step:hover .step-actions, .step[data-open="true"] .step-actions { opacity: 1; }
+  .mini-btn {
+    font: inherit; font-size: 10.5px; color: var(--ink-2); background: var(--surface-2);
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px 7px; cursor: pointer;
+  }
+  .mini-btn:hover { color: var(--ink); border-color: var(--line-2); }
+
+  /* ---------- 迷你地图：右侧竖条，默认收起 ---------- */
+  .map {
+    position: absolute; right: 0; top: 132px; bottom: 58px; z-index: 5;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 26px; pointer-events: none;
+  }
+  .map-toggle {
+    pointer-events: auto; width: 15px; height: 44px; border-radius: 7px 0 0 7px; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--line); border-right: 0;
+    display: grid; place-items: center; color: var(--ink-3); font-size: 9px; letter-spacing: 1px;
+    writing-mode: vertical-rl; transition: .18s;
+  }
+  .map-toggle:hover { color: var(--ink); background: var(--surface-2); }
+  .map-ticks {
+    pointer-events: auto; display: none; flex-direction: column; gap: 4px; align-items: center;
+    max-height: 100%; overflow: hidden; padding: 6px 3px; background: var(--surface);
+    border: 1px solid var(--line); border-right: 0; border-radius: 8px 0 0 8px;
+  }
+  .map[data-open="true"] .map-ticks { display: flex; }
+  .map[data-open="true"] .map-toggle { display: none; }
+  .tick {
+    width: 12px; height: 4px; border: 0; padding: 0; border-radius: 99px; cursor: pointer;
+    background: var(--ink-3); opacity: .35; transition: .18s; position: relative;
+  }
+  .tick[data-active="true"] { opacity: .9; width: 16px; background: var(--accent); }
+  .tick::after {
+    content: attr(data-label); position: absolute; right: 20px; top: 50%; translate: 0 -50%;
+    background: var(--ink); color: var(--panel); font-size: 10px; padding: 3px 7px; border-radius: 6px;
+    white-space: nowrap; opacity: 0; pointer-events: none; transition: .15s;
+  }
+  .tick:hover::after { opacity: 1; }
+
+  /* ---------- 底部 ---------- */
+  .foot { position: absolute; left: 50%; bottom: 12px; translate: -50% 0; z-index: 6;
+    font: inherit; font-size: 11px; color: var(--ink-2); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer;
+    box-shadow: 0 6px 18px -12px rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: .2s; }
+  .foot[data-show="true"] { opacity: 1; pointer-events: auto; }
+
+  /* ---------- 外观设置（预留能力演示） ---------- */
+  .popover {
+    position: absolute; right: 12px; top: 74px; z-index: 9; width: 248px; padding: 12px;
+    background: var(--surface); border: 1px solid var(--line-2); border-radius: 12px;
+    box-shadow: 0 18px 40px -26px rgba(0,0,0,.5); display: none; flex-direction: column; gap: 10px;
+    font-size: 11.5px; color: var(--ink-2);
+  }
+  .popover[data-open="true"] { display: flex; }
+  .popover label { display: flex; flex-direction: column; gap: 5px; }
+  .popover input[type="text"] {
+    font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line);
+    border-radius: 7px; padding: 5px 7px;
+  }
+  .popover input[type="range"] { accent-color: var(--accent); }
+  .seg { display: flex; gap: 4px; }
+  .seg button {
+    flex: 1; font: inherit; font-size: 11px; color: var(--ink-2); cursor: pointer;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 4px 0;
+  }
+  .seg button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-soft); }
+  .hint { font-size: 10.5px; color: var(--ink-3); line-height: 1.6; }
+</style>
+</head>
+<body data-theme="paper">
+
+<div class="panel" id="panel">
+  <header class="head">
+    <div class="title-row">
+      <span class="title">思考</span>
+      <span class="counts" id="counts">49 步 · 67,072 字</span>
+      <div class="tools">
+        <button class="tool" aria-expanded="false"><svg viewBox="0 0 16 16"><path d="M2 4h12M4 8h8M6 12h4"/></svg>翻译 · 只翻新的</button>
+        <button class="tool" aria-pressed="false">双语</button>
+        <button class="tool" aria-label="展开全部" title="展开全部"><svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4"/></svg></button>
+        <button class="tool" aria-label="复制原文" title="复制原文"><svg viewBox="0 0 16 16"><rect x="5" y="5" width="8" height="8" rx="1.5"/><path d="M3 10V4a1 1 0 011-1h6"/></svg></button>
+        <button class="tool" id="appearance" aria-label="外观" title="外观" aria-expanded="false"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 2v12M2 8h12"/></svg></button>
+      </div>
+    </div>
+    <div class="history-bar">
+      <button class="tool hist-btn" id="loadOlder" title="读取更早的轮次">↑ 载入更早</button>
+      <input class="hist-search" id="searchTurn" placeholder="搜历史轮次…" />
+      <span class="hist-state" id="histState">仅显示已加载的 12–15 轮</span>
+    </div>
+    <div class="rail-wrap" id="railWrap">
+      <button class="rail-nav" data-side="left" aria-label="上一段">›</button>
+      <div class="rail" id="rail"></div>
+      <button class="rail-nav" data-side="right" aria-label="下一段">›</button>
+    </div>
+  </header>
+
+  <div class="popover" id="popover">
+    <label>背景图地址（留空=纯色）
+      <input type="text" id="bgInput" placeholder="https://… 或 data:image/…" />
+    </label>
+    <label>气泡圆角 <input type="range" id="radius" min="4" max="22" value="15" /></label>
+    <label>气泡尖角 <input type="range" id="tail" min="0" max="14" value="5" /></label>
+    <div>
+      <div style="margin-bottom:5px">气泡形状</div>
+      <div class="seg" id="shapeSeg">
+        <button data-r="15" aria-pressed="true">圆润</button>
+        <button data-r="8">柔和</button>
+        <button data-r="3">方角</button>
+      </div>
+    </div>
+    <label>气泡深浅（你的话） <input type="range" id="depth" min="0" max="100" value="68" /><span class="val" id="depthVal">68</span></label>
+    <label>思考气泡深浅（AI） <input type="range" id="aidepth" min="0" max="100" value="100" /><span class="val" id="aidepthVal">100</span></label>
+
+    <label class="switch"><input type="checkbox" id="autoTheme" /> 跟随系统深浅色（默认关）</label>
+
+    <div class="hint">两项颜色以后进设置面板并持久化；现在先证明接口是通的。</div>
+  </div>
+
+  <div class="scroll" id="scroll"><div class="body" id="body"></div></div>
+
+  <nav class="map" id="map" data-open="false" aria-label="轮次迷你地图">
+    <button class="map-toggle" id="mapToggle" title="展开轮次地图">⋯⋯</button>
+    <div class="map-ticks" id="mapTicks"></div>
+  </nav>
+
+  <button class="foot" id="foot" data-show="false">↓ 回到最新</button>
+</div>
+
+<nav class="switcher" id="switcher" aria-label="护眼主题">
+  <button data-theme="paper" aria-pressed="true">纸白</button>
+  <button data-theme="ink">夜墨</button>
+</nav>
+
+<script>
+const TURNS = [
+  { turn: 12, user: '还是灰的，不可用。下拉也不行', steps: [
+    { open: true, text: '先确认 remote.cotTranslation 是否存在：下拉变灰说明客户端服务没挂上，只有宿主端在跑。', chars: 206, tr: '先确认 remote.cotTranslation 在不在：下拉菜单变灰说明客户端服务没有挂载，只有宿主进程在运行。' },
+    { open: false, text: '接着看 client roster 合成逻辑：只有声明了 dsh.client 的宿主条目才会进入网页引导清单。', chars: 677 },
+  ]},
+  { turn: 13, user: '一个翻译失败。一个只能看到第十三轮', steps: [
+    { open: true, text: '翻译失败是跨域被拦：页面直接请求 edge.microsoft.com 触发 CORS 预检失败，宿主进程本来有网络，所以改成同源代理。', chars: 362, tr: '翻译失败是因为跨域被拦截：页面直接请求 edge.microsoft.com 时触发了 CORS 预检失败；宿主进程本身有网络，所以改为同源代理。' },
+    { open: false, text: '只看到第十三轮：Chat 是滚动分页加载，面板只能拿到已经加载进内存的那一段轮次。', chars: 238 },
+    { open: false, text: '把这两件事分开修：翻译走宿主代理，历史走加载更多。', chars: 1524 },
+  ]},
+  { turn: 14, user: '目前没问题了，但是我希望后续能够优化ui展示部分，一个是当前没办法快速定位用户发了那一段话之后的思考。', steps: [
+    { open: false, text: '先把定位做出来：轮次锚点 + 迷你地图 + 回到最新，这三层就够了。', chars: 801 },
+    { open: false, text: '再谈观感，气泡按 QQ 的来回分左右，但去掉头像和强对比。', chars: 420 },
+  ]},
+  { turn: 15, user: '气泡不要头像，用户右边、AI 左边，颜色别用高饱和。', steps: [
+    { open: false, text: '颜色全部走变量，饱和度压到 15% 上下，强调色只用在一处。', chars: 655 },
+  ]},
+];
+
+const rail = document.getElementById('rail');
+const body = document.getElementById('body');
+const railWrap = document.getElementById('railWrap');
+const scroll = document.getElementById('scroll');
+const foot = document.getElementById('foot');
+const map = document.getElementById('map');
+const mapTicks = document.getElementById('mapTicks');
+
+const caret = '<svg class="caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4"/></svg>';
+
+body.innerHTML = TURNS.map((t) => `
+  <section class="turn" id="turn-${t.turn}" data-turn="${t.turn}">
+    <div class="turn-meta">第 ${t.turn} 轮</div>
+    <div class="mine-row"><div class="mine">${t.user}</div></div>
+    <div class="ai">
+      <div class="steps">
+        ${t.steps.map((s, i) => `
+          <article class="step" data-open="${s.open ? 'true' : 'false'}">
+            <button class="step-head">
+              <span class="no">#${String(i + 1).padStart(2, '0')}</span>
+              <span class="state">已完成</span>
+              <span class="chars">${s.chars} 字</span>
+              ${caret}
+            </button>
+            <div class="step-body">
+              <p class="think">${s.text}</p>
+              ${s.tr ? `<div class="tr">${s.tr}</div>` : ''}
+              <div class="step-actions"><button class="mini-btn">复制</button><button class="mini-btn">翻译本步</button></div>
+            </div>
+          </article>`).join('')}
+      </div>
+    </div>
+  </section>`).join('');
+
+rail.innerHTML = TURNS.map((t) => `
+  <button class="chip" data-jump="${t.turn}"><b>${t.turn}</b><span>${t.user.slice(0, 14)}</span></button>`).join('');
+
+mapTicks.innerHTML = TURNS.map((t) => `
+  <button class="tick" data-jump="${t.turn}" data-label="第 ${t.turn} 轮"></button>`).join('');
+
+const chips = [...rail.querySelectorAll('.chip')];
+const ticks = [...mapTicks.querySelectorAll('.tick')];
+
+railWrap.querySelector('[data-side="left"]').addEventListener('click', () => rail.scrollBy({ left: -240, behavior: 'smooth' }));
+railWrap.querySelector('[data-side="right"]').addEventListener('click', () => rail.scrollBy({ left: 240, behavior: 'smooth' }));
+
+function measureRail() {
+  railWrap.dataset.overflow = rail.scrollWidth > rail.clientWidth + 4 ? 'true' : 'false';
+}
+measureRail();
+new ResizeObserver(measureRail).observe(rail);
+
+document.addEventListener('click', (event) => {
+  const jump = event.target.closest('[data-jump]');
+  if (jump) {
+    const el = document.getElementById('turn-' + jump.dataset.jump);
+    if (el) scroll.scrollTo({ top: el.offsetTop - 6, behavior: 'smooth' });
+    return;
+  }
+  const head = event.target.closest('.step-head');
+  if (head) {
+    const step = head.closest('.step');
+    step.dataset.open = step.dataset.open === 'true' ? 'false' : 'true';
+    return;
+  }
+  if (!event.target.closest('#popover') && !event.target.closest('#appearance')) {
+    document.getElementById('popover').dataset.open = 'false';
+    document.getElementById('appearance').setAttribute('aria-expanded', 'false');
+  }
+});
+
+document.getElementById('mapToggle').addEventListener('click', () => {
+  map.dataset.open = 'true';
+});
+
+scroll.addEventListener('scroll', () => {
+  const fromBottom = scroll.scrollHeight - scroll.scrollTop - scroll.clientHeight;
+  foot.dataset.show = fromBottom > 180 ? 'true' : 'false';
+  const top = scroll.scrollTop + 18;
+  let current = null;
+  for (const section of body.querySelectorAll('.turn')) {
+    const active = section.offsetTop <= top;
+    if (active) current = section.dataset.turn;
+  }
+  for (const chip of chips) chip.dataset.active = chip.dataset.jump === current ? 'true' : 'false';
+  for (const tick of ticks) tick.dataset.active = tick.dataset.jump === current ? 'true' : 'false';
+  const activeChip = chips.find((c) => c.dataset.active === 'true');
+  if (activeChip) {
+    const left = activeChip.offsetLeft - rail.clientWidth / 2 + activeChip.clientWidth / 2;
+    rail.scrollTo({ left, behavior: 'smooth' });
+  }
+}, { passive: true });
+
+foot.addEventListener('click', () => scroll.scrollTo({ top: scroll.scrollHeight, behavior: 'smooth' }));
+
+/* ---- 外观设置 ---- */
+const popover = document.getElementById('popover');
+const appearance = document.getElementById('appearance');
+appearance.addEventListener('click', () => {
+  const open = popover.dataset.open !== 'true';
+  popover.dataset.open = open ? 'true' : 'false';
+  appearance.setAttribute('aria-expanded', String(open));
+});
+document.getElementById('bgInput').addEventListener('input', (event) => {
+  const value = event.target.value.trim();
+  document.getElementById('panel').style.setProperty('--p-bg-image', value ? `url("${value}")` : 'none');
+});
+const radius = document.getElementById('radius');
+const tail = document.getElementById('tail');
+radius.addEventListener('input', () => document.documentElement.style.setProperty('--bubble-radius', radius.value + 'px'));
+tail.addEventListener('input', () => document.documentElement.style.setProperty('--bubble-tail', tail.value + 'px'));
+document.getElementById('shapeSeg').addEventListener('click', (event) => {
+  const button = event.target.closest('button');
+  if (!button) return;
+  radius.value = button.dataset.r;
+  document.documentElement.style.setProperty('--bubble-radius', button.dataset.r + 'px');
+  for (const b of button.parentElement.children) b.setAttribute('aria-pressed', String(b === button));
+});
+
+/* ---- 新增可调项：气泡深浅 / 气泡文字亮度 / 文字对比 / 玻璃强度 ---- */
+(() => {
+  const root = document.documentElement;
+  const wire = (id, valId, varName, unit) => {
+    const input = document.getElementById(id);
+    const out = document.getElementById(valId);
+    if (!input) return;
+    const apply = () => {
+      root.style.setProperty(varName, input.value + unit);
+      if (out) out.textContent = input.value;
+    };
+    input.addEventListener('input', apply);
+    apply();
+  };
+  wire('depth', 'depthVal', '--bubble-depth', '');
+  wire('glass', 'glassVal', '--glass-blur', 'px');
+})();
+
+/* ---- 主题切换（演示） ---- */
+const switcher = document.getElementById('switcher');
+function setTheme(name) {
+  document.body.dataset.theme = name;
+  for (const button of switcher.children) button.setAttribute('aria-pressed', String(button.dataset.theme === name));
+}
+switcher.addEventListener('click', (event) => {
+  const button = event.target.closest('button');
+  if (button) setTheme(button.dataset.theme);
+});
+const params = new URLSearchParams(location.search);
+setTheme(params.get('theme') || 'paper');
+if (params.get('map') === 'open') map.dataset.open = 'true';
+</script>
+  <script>
+    // 顶部快速定位：滚轮横向滚动 + 到边隐藏箭头
+    (() => {
+      const rail = document.querySelector('.rail');
+      const wrap = rail && rail.closest('.rail-wrap');
+      if (!rail || !wrap) return;
+
+      rail.addEventListener('wheel', (event) => {
+        if (rail.scrollWidth <= rail.clientWidth + 2) return;
+        if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+        if (event.deltaY === 0) return;
+        event.preventDefault();
+        rail.scrollLeft += event.deltaY;
+      }, { passive: false });
+
+      const sync = () => {
+        const max = rail.scrollWidth - rail.clientWidth;
+        const left = wrap.querySelector('.rail-nav[data-side="left"]');
+        const right = wrap.querySelector('.rail-nav[data-side="right"]');
+        const overflow = max > 2;
+        wrap.dataset.overflow = overflow ? 'true' : 'false';
+        if (left) left.hidden = !overflow || rail.scrollLeft <= 2;
+        if (right) right.hidden = !overflow || rail.scrollLeft >= max - 2;
+      };
+
+      rail.addEventListener('scroll', sync, { passive: true });
+      new ResizeObserver(sync).observe(rail);
+      sync();
+    })();
+  </script>
+  <style>
+    /* 外观面板：滑杆行 = 标题 + 数值（同一行）+ 滑杆（整行） */
+    .popover label { display: grid; grid-template-columns: 1fr auto; gap: 5px 8px; align-items: center; }
+    .popover label > input[type="range"] { grid-column: 1 / -1; width: 100%; margin: 0; }
+    .popover label .val { grid-row: 1; grid-column: 2; justify-self: end; margin: 0; color: var(--ink-3); font-size: 10.5px; }
+    /* 低对比滑杆：细轨 + 小圆钮，不用默认黑轨 */
+    .popover input[type="range"] {
+      -webkit-appearance: none; appearance: none; height: 14px; background: transparent; cursor: pointer;
+    }
+    .popover input[type="range"]::-webkit-slider-runnable-track {
+      height: 3px; border-radius: 999px;
+      background: color-mix(in srgb, var(--ink-3) 34%, transparent);
+    }
+    .popover input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 12px; height: 12px; margin-top: -4.5px;
+      border-radius: 999px; background: var(--accent); border: 2px solid var(--surface);
+      box-shadow: 0 1px 3px rgba(30, 26, 20, .3);
+    }
+    .popover input[type="range"]::-moz-range-track { height: 3px; border-radius: 999px; background: color-mix(in srgb, var(--ink-3) 34%, transparent); }
+    .popover input[type="range"]::-moz-range-thumb { width: 10px; height: 10px; border-radius: 999px; background: var(--accent); border: 2px solid var(--surface); }
+  </style><style>
+  /* 思考气泡（AI 侧步骤卡）也走可调色：100 = 主题原色，0 = 融入面板 */
+  .step {
+    background: color-mix(in srgb, var(--surface) calc(var(--ai-depth, 100) * 1%), transparent) !important;
+  }
+  /* 历史栏 */
+  .history-bar {
+    display: flex; align-items: center; gap: 8px; padding: 0 2px 2px; flex: none;
+  }
+  .hist-btn { flex: none; }
+  .hist-btn[disabled] { opacity: .45; cursor: default; }
+  .hist-search {
+    flex: 1 1 auto; min-width: 0; height: 26px; padding: 0 10px; font: inherit; font-size: 11.5px;
+    color: var(--ink-2); background: var(--surface); border: 1px solid var(--line);
+    border-radius: 999px; outline: none;
+  }
+  .hist-search::placeholder { color: var(--ink-3); }
+  .hist-search:focus { border-color: var(--accent); }
+  .hist-state { flex: none; font-size: 10.5px; color: var(--ink-3); white-space: nowrap; }
+  /* 开关 */
+  .popover label.switch { display: flex !important; flex-direction: row !important; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); grid-template-columns: none !important; }
+  .popover label.switch input { accent-color: var(--accent); width: 14px; height: 14px; }
+  .turn[data-flash="true"] .mine { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 34%, transparent); }
+</style>
+<script>
+  /* ---- 思考气泡深浅 ---- */
+  (() => {
+    const input = document.getElementById('aidepth');
+    const out = document.getElementById('aidepthVal');
+    if (!input) return;
+    const apply = () => {
+      document.documentElement.style.setProperty('--ai-depth', input.value);
+      if (out) out.textContent = input.value;
+    };
+    input.addEventListener('input', apply);
+    apply();
+  })();
+
+  /* ---- 跟随系统深浅色（默认关） ---- */
+  (() => {
+    const box = document.getElementById('autoTheme');
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const apply = () => {
+      if (box.checked) setTheme(media.matches ? 'ink' : 'paper');
+    };
+    box.addEventListener('change', () => {
+      apply();
+      if (!box.checked) setTheme('paper');
+    });
+    media.addEventListener('change', apply);
+  })();
+
+  /* ---- 独立加载历史：不依赖对话区滚动 ---- */
+  (() => {
+    const button = document.getElementById('loadOlder');
+    const state = document.getElementById('histState');
+    const search = document.getElementById('searchTurn');
+    const OLDER = [
+      { turns: [8, 9, 10], label: '第 8–10 轮' },
+      { turns: [5, 6, 7], label: '第 5–7 轮' },
+      { turns: [1, 2, 3, 4], label: '第 1–4 轮' },
+    ];
+    const TEXT = {
+      8: ['把翻译改成宿主同源代理，避免页面直连被 CORS 拦。', '代理补上 translator 服务优先、Edge 直连兜底的两条路。'],
+      9: ['控制台里补一轮探针，确认客户端插件表里到底有没有 cot 翻译。', '探针结果：客户端表有我们的面板，没有 cot 翻译。'],
+      10: ['决定不再依赖实验插件，改在宿主端做翻译代理。', '面板侧加同源请求，失败再回退直连。'],
+      7: ['气泡颜色和背景分三层：页面、面板、气泡。', '浅色系气泡比面板深一档，深色系反过来。'],
+      6: ['毛玻璃用 backdrop-filter，强度做成变量。', '定位条支持滚轮，横向滚动换算到 scrollLeft。'],
+      5: ['第一版右栏面板：时间线、步骤卡、复制。', '白色底看起来像白板，被要求重做视觉。'],
+      4: ['确认右栏插槽是 sidebar.right.pane.tab。', '注册 tab 后必须自绘整块面板，否则高度塌陷。'],
+      3: ['找出思考文本的来源：assistant-step 的 reasoning 块。', '流式时按块追加，展开状态要能被用户打断。'],
+      2: ['确认 DSH 自带聊天已经有 Think 行和折叠。', '需要的是右栏常驻视图，而不是再加一个折叠行。'],
+      1: ['为什么要做这个面板：不想为了看思考把对话挤窄。', '先定三件事：右栏、流式、可定位。'],
+    };
+    let index = 0;
+
+    const section = (turn) => {
+      const steps = TEXT[turn] || ['（更早的内容）'];
+      return `
+  <section class="turn" id="turn-${turn}" data-turn="${turn}">
+    <div class="turn-meta">第 ${turn} 轮</div>
+    <div class="mine-row"><div class="mine">历史轮次 ${turn}：这是从会话记录里独立加载的内容，不依赖左侧对话区先滚动到那里。</div></div>
+    <div class="ai"><div class="steps">
+      ${steps.map((text, i) => `
+        <article class="step" data-open="false">
+          <button class="step-head"><span class="no">#${String(i + 1).padStart(2, '0')}</span><span class="state">已完成</span><span class="chars">${120 + i * 37} 字</span><svg class="caret" viewBox="0 0 16 16"><path d="M6 4l4 4-4 4"/></svg></button>
+          <div class="step-body"><p class="think">${text}</p><div class="step-actions"><button class="mini-btn">复制</button><button class="mini-btn">翻译本步</button></div></div>
+        </article>`).join('')}
+    </div></div>
+  </section>`;
+    };
+
+    button.addEventListener('click', () => {
+      if (index >= OLDER.length) return;
+      const batch = OLDER[index];
+      button.disabled = true;
+      button.textContent = '读取中…';
+      window.setTimeout(() => {
+        const before = scroll.scrollHeight;
+        body.insertAdjacentHTML('afterbegin', batch.turns.map(section).join(''));
+        rail.insertAdjacentHTML('afterbegin', batch.turns.map((turn) => `<button class="chip" data-jump="${turn}"><b>${turn}</b><span>历史轮次 ${turn}</span></button>`).join(''));
+        mapTicks.insertAdjacentHTML('afterbegin', batch.turns.map((turn) => `<button class="tick" data-jump="${turn}" data-label="第 ${turn} 轮"></button>`).join(''));
+        chips.length = 0;
+        chips.push(...rail.querySelectorAll('.chip'));
+        ticks.length = 0;
+        ticks.push(...mapTicks.querySelectorAll('.tick'));
+        scroll.scrollTop += scroll.scrollHeight - before;
+        index += 1;
+        state.textContent = `已加载 ${batch.label}`;
+        if (index >= OLDER.length) {
+          button.textContent = '已到最早';
+          button.disabled = true;
+        } else {
+          button.disabled = false;
+          button.textContent = '↑ 载入更早';
+        }
+        measureRail();
+      }, 420);
+    });
+
+    search.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      const query = search.value.trim();
+      if (query === '') return;
+      const hit = [...body.querySelectorAll('.turn')].find((node) => node.textContent.includes(query));
+      if (hit === undefined) {
+        state.textContent = '已加载的内容里没有命中，试试“载入更早”';
+        return;
+      }
+      scroll.scrollTo({ top: hit.offsetTop - 6, behavior: 'smooth' });
+      hit.dataset.flash = 'true';
+      window.setTimeout(() => { delete hit.dataset.flash; }, 1400);
+      state.textContent = `定位到第 ${hit.dataset.turn} 轮`;
+    });
+  })();
+</script><style>
+  /* ===== v6：只留纸白 / 夜墨；磨砂搬到气泡上；取消文字亮度与对比 ===== */
+  :root { --glass-blur: 12; }
+  body {
+    --ink: var(--ink-base);
+    --mine-ink: var(--mine-ink-base);
+    --mine: color-mix(in srgb, var(--mine-base) calc(var(--bubble-depth, 68) * 1%), transparent);
+  }
+  .panel { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  [data-theme="paper"] .panel { background: rgba(255, 255, 255, .92); }
+  [data-theme="ink"] {
+    --page: #15181b; --page-2: #0e1113;
+    --panel: rgba(30, 34, 37, .94); --surface: #2c3236; --surface-2: #343a3e;
+    --mine-base: #3f474d; --mine-ink-base: #dbe1e2;
+    --ink-base: #c8cdcf; --ink-strong: #eef2f3;
+  }
+  .mine {
+    border: 1px solid var(--mine-line);
+  }
+  .step {
+    background: color-mix(in srgb, var(--surface) calc(var(--ai-depth, 100) * 1%), transparent) !important;
+  }
+  [data-theme="ink"] .step { border-color: rgba(190, 200, 204, .10); }
+
+</style>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

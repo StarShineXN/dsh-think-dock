@@ -1,0 +1,9 @@
+# dsh-think-dock bundle patch
+#
+# The single loader row this package needs. When the bundle is installed through
+# the plugin manager, this layer is merged after every other bundle layer and
+# mounts the Host half of the package (an inert plugin: all of the work happens
+# in the browser half declared by `dsh.client` in package.json).
+- insert:
+    - id: think-dock
+      name: 'dsh-think-dock'
