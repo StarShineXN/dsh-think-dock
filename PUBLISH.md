@@ -13,22 +13,29 @@ cd 'F:\DSH\DSH插件自开发\2026-10-21_右栏思考面板\dsh-think-dock'
 
 ---
 
-## 第 0 步：先改三个占位符
+## 第 0 步：作者信息（已填好，一般不用动）
 
-`package.json` 和两个 README 里现在写着 `YOUR_GITHUB_NAME` / `YOUR NAME`。先换成你自己的（改成什么，仓库地址就是什么）：
+`package.json` 与三份 README/LICENSE 里现在已经是：
+
+- 仓库地址：`https://github.com/StarShineXN/dsh-think-dock`
+- 作者：`StarShine-XiuNing`
+
+将来要换 GitHub 用户名或署名，跑一次下面这段（把 `$oldGh/$oldMe` 改成当前值）：
 
 ```powershell
-$gh = 'your-github-name'      # ← 换成你的 GitHub 用户名
-$me = '你的名字'               # ← 署名，可中文
-Get-ChildItem -Recurse -File -Include *.md,package.json |
+$oldGh = 'StarShineXN';       $newGh = '新用户名'
+$oldMe = 'StarShine-XiuNing'; $newMe = '新署名'
+Get-ChildItem -Recurse -File -Include *.md,package.json,LICENSE |
   ForEach-Object {
     $t = Get-Content -LiteralPath $_.FullName -Raw
-    $t = $t.Replace('YOUR_GITHUB_NAME', $gh).Replace('YOUR NAME', $me)
+    $t = $t.Replace($oldGh, $newGh).Replace($oldMe, $newMe)
     Set-Content -LiteralPath $_.FullName -Value $t -Encoding utf8 -NoNewline
   }
 ```
 
-> 名字建议就用 `dsh-think-dock`（见仓库根目录 `设计定稿.md` 的说明）。想换名字，`package.json` 的 `name`、`cordis.patch.yml`、`lib/client.js` 顶部的 `id` 要一起改，否则 DSH 装不上。
+> 仓库名建议就用 `dsh-think-dock`。想改名的话，`package.json` 的 `name`、`cordis.patch.yml` 的行名、`lib/client.js` 顶部的 `id` 要一起改，否则 DSH 装不上。
+>
+> 仓库已经 `git init` 并提交过了（3 个提交），所以第 1 步可以跳过，直接从第 2 步开始。
 
 ---
 

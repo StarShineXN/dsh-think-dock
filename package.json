@@ -50,12 +50,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/YOUR_GITHUB_NAME/dsh-think-dock.git"
+    "url": "git+https://github.com/StarShineXN/dsh-think-dock.git"
   },
-  "homepage": "https://github.com/YOUR_GITHUB_NAME/dsh-think-dock#readme",
+  "homepage": "https://github.com/StarShineXN/dsh-think-dock#readme",
   "bugs": {
-    "url": "https://github.com/YOUR_GITHUB_NAME/dsh-think-dock/issues"
+    "url": "https://github.com/StarShineXN/dsh-think-dock/issues"
   },
-  "author": "YOUR NAME",
+  "author": "StarShine-XiuNing",
   "license": "MIT"
 }

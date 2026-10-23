@@ -87,4 +87,4 @@ dsh-think-dock/
 
 ## 许可
 
-MIT © 2026 YOUR NAME
+MIT © 2026 StarShine-XiuNing

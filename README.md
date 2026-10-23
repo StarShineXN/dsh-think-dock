@@ -78,4 +78,4 @@ Restart DSH after editing `lib/*.js` — the browser half is assembled at page l
 
 ## License
 
-MIT © 2026 YOUR NAME
+MIT © 2026 StarShine-XiuNing
