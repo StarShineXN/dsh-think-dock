@@ -17,6 +17,10 @@ In DeepSeek Harness the model's reasoning sits behind a collapsible *Think* row 
 ## Features
 
 - Timeline grouped by **turn → step**, appended live while the model streams.
+- **QQ-style prompts**: each turn starts with the user's own message on the right, no avatars.
+- **Independent history**: the dock reads the whole session log from the host, so older turns are one click away — the conversation window does not have to be scrolled first. Search across turns and jump straight to a match.
+- **Turn rail + turn map**: a scrollable chip rail under the header, and a collapsible dot map on the right edge for long sessions.
+- **Appearance panel**: paper/ink theme, optional follow-system switch, bubble depth, thinking-bubble depth, corner radius, bubble tail and a background image URL — persisted in `localStorage`.
 - Read-only: no changes to the conversation, messages or composer.
 - **Translation in three modes** — `off` / `new only` (default: only reasoning that arrives after you open the dock) / `everything` — plus a bilingual switch (original above, translation below).
 - Translation source is picked automatically: your installed *reasoning translation* plugin is reused when present; otherwise a bundled same-origin route proxies to Microsoft Edge's public translator.
@@ -36,7 +40,7 @@ Clone or unzip this repository anywhere, then install the local package:
 plugin_manager({ action: "install_bundle", target: "file:<absolute path to this repository>" })
 ```
 
-Restart DSH afterwards (the host half mounts `/think-dock/translate`).
+Restart DSH afterwards (the host half mounts `/think-dock/translate` and `/think-dock/history`).
 
 ### Option B · manual
 
@@ -56,7 +60,7 @@ Copy-Item -Recurse .\dsh-think-dock "$profile\node_modules\dsh-think-dock"
 
 ## Limitations
 
-- Only turns already loaded in the page are shown; scroll up in the conversation to load older ones.
+- History is read from the host session log; sessions restored from a newer format than the running DSH may fail to replay (the dock then keeps showing the loaded window).
 - Translation needs outbound access to `edge.microsoft.com`, unless your own translation plugin is installed.
 - Translation is fragment-based, 1200 characters per request at most.
 - The dock is a read-only view: you cannot edit or resend messages from it.
@@ -79,3 +83,4 @@ Restart DSH after editing `lib/*.js` — the browser half is assembled at page l
 ## License
 
 MIT © 2026 StarShine-XiuNing
+

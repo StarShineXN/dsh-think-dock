@@ -1,6 +1,6 @@
 {
   "name": "dsh-think-dock",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A right-sidebar dock for the model's thinking in DeepSeek Harness: read the reasoning stream per turn and step, with optional translation, without expanding it inline.",
   "keywords": [
     "dsh",
@@ -59,3 +59,4 @@
   "author": "StarShine-XiuNing",
   "license": "MIT"
 }
+
