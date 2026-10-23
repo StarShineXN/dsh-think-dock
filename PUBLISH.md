@@ -2,6 +2,8 @@
 
 > 目标：把这个文件夹变成一个公开的 GitHub 仓库，别人能看到、能装、能提 issue。
 > 全程只需要：Git（你机器上已有 2.56）、一个 GitHub 账号、一个浏览器。命令都在仓库目录里执行。
+>
+> 不想敲命令？用 VS Code 的图形界面走一遍，见 [`docs/用-VSCode-发布到-GitHub.md`](docs/用-VSCode-发布到-GitHub.md)。
 
 仓库目录（就是含 `package.json` 的这一层）：
 
