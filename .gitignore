@@ -16,3 +16,7 @@ _tmp/
 dist/
 coverage/
 *.tgz
+
+# 截图工具的临时报告
+*.report.json
+*-report.json
